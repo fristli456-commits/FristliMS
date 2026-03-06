@@ -10,7 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
 :root{--bg:#0d0f14;--sf:#161923;--sf2:#1e2330;--sf3:#252b3b;--ac:#6c63ff;--ac2:#a78bfa;--tx:#e8eaf6;--dim:#7b82a0;--gr:#43e97b;--rd:#ff5f7e;}
@@ -400,7 +400,12 @@ firebase.initializeApp({
   messagingSenderId:"734039589204",
   appId:"1:734039589204:web:51c8853cfb7e30850108c1"
 });
-const auth=firebase.auth(),db=firebase.firestore(),stg=firebase.storage();
+const auth=firebase.auth(),db=firebase.firestore();
+
+// ══ CLOUDINARY — вставь свои данные ══
+const CDN_CLOUD='decoxs1yv';
+const CDN_PRESET='zi1bflwv';
+// ══════════════════════════════════════
 
 let ME=null,CID=null,PID=null;
 let uM=null,uC=null,uPr=null,uTy=null;
@@ -517,15 +522,13 @@ $('pavWrap').onclick=()=>$('fiAv').click();
 $('fiAv').onchange=async function(){
   const file=this.files[0];if(!file)return;
   if(file.size>5*1024*1024)return toast('Фото макс. 5МБ');
-  toast('Загружаем аватарку...',10000);
+  toast('Загружаем аватарку...',15000);
   try{
-    const ref=stg.ref(`avatars/${ME.uid}`);
-    await ref.put(file);
-    const url=await ref.getDownloadURL();
+    const url=await uploadCDN(file);
     await ME.updateProfile({photoURL:url});
     await db.collection('users').doc(ME.uid).update({photoURL:url});
     fillP();toast('Аватарка обновлена ✓');
-  }catch(er){toast('Ошибка загрузки');}
+  }catch(er){console.error(er);toast('Ошибка: '+er.message);}
   this.value='';
 };
 
@@ -867,17 +870,28 @@ $('amFL').onclick=()=>{$('fi4').click();CP();};
 $('fi3').addEventListener('change',e=>{if(e.target.files[0])upFile(e.target.files[0],'video','fi3');});
 $('fi4').addEventListener('change',e=>{if(e.target.files[0])upFile(e.target.files[0],'file','fi4');});
 
+// Upload to Cloudinary
+async function uploadCDN(file){
+  if(CDN_CLOUD==='ТВОЙ_CLOUD_NAME')throw new Error('Вставь Cloud Name и Upload Preset!');
+  const fd=new FormData();
+  fd.append('file',file);
+  fd.append('upload_preset',CDN_PRESET);
+  const res=await fetch('https://api.cloudinary.com/v1_1/'+CDN_CLOUD+'/auto/upload',{method:'POST',body:fd});
+  if(!res.ok)throw new Error('Cloudinary error '+res.status);
+  const json=await res.json();
+  if(json.error)throw new Error(json.error.message);
+  return json.secure_url;
+}
+
 async function upFile(file,type,inp){
   if(!file||!CID)return;
   if(file.size>50*1024*1024)return toast('Макс. размер 50МБ');
-  toast('Загружаем... 📤',30000);
+  toast('Загружаем... 📤',60000);
   try{
-    const ref=stg.ref('chats/'+CID+'/'+Date.now()+'_'+file.name);
-    const snap=await ref.put(file);
-    const url=await ref.getDownloadURL();
+    const url=await uploadCDN(file);
     await doSend({type,url,fileName:file.name,size:file.size,text:''});
     toast('Отправлено ✓');
-  }catch(er){console.error(er);toast('Ошибка загрузки: '+er.message);}
+  }catch(er){console.error(er);toast('Ошибка: '+er.message);}
   $(inp).value='';
 }
 
