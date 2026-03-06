@@ -153,6 +153,16 @@ html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-fa
 .mfi{width:32px;height:32px;border-radius:9px;background:rgba(108,99,255,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .mfn{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
 .mfs{font-size:11px;color:var(--dim);margin-top:1px}
+/* ── AUDIO PLAYER ── */
+.maudio{display:flex;align-items:center;gap:9px;padding:4px 2px;margin-bottom:3px;min-width:200px}
+.aplay{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .12s}
+.aplay:active{transform:scale(.9)}
+.bub.out .aplay{background:rgba(255,255,255,.25)}
+.bub.in .aplay{background:var(--ac)}
+.awave{flex:1;height:28px;cursor:pointer;position:relative}
+.awave canvas{width:100%;height:100%}
+.adur{font-size:11px;font-weight:600;opacity:.6;white-space:nowrap;min-width:32px;text-align:right}
+
 .swi{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--ac2);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:5}
 .mr.me .swi{left:-36px}
 .mr:not(.me) .swi{right:-36px}
@@ -376,6 +386,7 @@ html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-fa
   <div class="ao" id="amPH"><div class="aoi" style="background:rgba(67,233,123,.18)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#43e97b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>Фото</div>
   <div class="ao" id="amCA"><div class="aoi" style="background:rgba(79,172,254,.18)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4facfe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Камера</div>
   <div class="ao" id="amVD"><div class="aoi" style="background:rgba(108,99,255,.2)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>Видео</div>
+  <div class="ao" id="amAU"><div class="aoi" style="background:rgba(67,233,123,.18)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#43e97b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>Аудио файл</div>
   <div class="ao" id="amFL"><div class="aoi" style="background:rgba(250,112,154,.18)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fa709a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>Файл</div>
 </div>
 
@@ -388,6 +399,7 @@ html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-fa
 <input type="file" id="fi3" accept="video/*" style="display:none">
 <input type="file" id="fi4" style="display:none">
 <input type="file" id="fiAv" accept="image/*" style="display:none">
+<input type="file" id="fi5" accept="audio/*" style="display:none">
 
 <div class="toast" id="toast"></div>
 
@@ -452,7 +464,7 @@ $('btnR').onclick=async function(){
 };
 function aErr(c){const m={'auth/user-not-found':'Пользователь не найден','auth/wrong-password':'Неверный пароль','auth/email-already-in-use':'Email уже занят','auth/invalid-email':'Некорректный email','auth/weak-password':'Слабый пароль','auth/invalid-credential':'Неверный email или пароль'};toast(m[c]||'Ошибка: '+c);}
 auth.onAuthStateChanged(u=>{
-  if(u){ME=u;$('btnL').textContent='Войти';$('btnL').disabled=false;$('btnR').textContent='Создать аккаунт';$('btnR').disabled=false;sOnline(true);SS('sl');loadChats();}
+  if(u){ME=u;$('btnL').textContent='Войти';$('btnL').disabled=false;$('btnR').textContent='Создать аккаунт';$('btnR').disabled=false;sOnline(true);SS('sl');loadChats();initPush();}
   else{if(ME)sOnline(false);ME=null;if(uC){uC();uC=null;}SS('sa');$('chatlist').innerHTML='<div class="ld"><div class="sp"></div></div>';}
 });
 
@@ -708,6 +720,7 @@ function rMsgs(msgs){
     if(m.type==='image')content=`<img class="mimg" src="${m.url}" alt="фото" data-src="${m.url}">`;
     else if(m.type==='video')content=`<video class="mvid" src="${m.url}" controls></video>`;
     else if(m.type==='file')content=`<a class="mf" href="${m.url}" target="_blank"><div class="mfi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${out?'white':'#a78bfa'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="mfn">${esc(m.fileName||'файл')}</div><div class="mfs">${m.size?fS(m.size):''}</div></div></a>`;
+    else if(m.type==='audio')content=`<div class="maudio" data-url="${m.url}" data-id="au_${m.id}"><button class="aplay" onclick="toggleAudio('${m.id}','${m.url}',this)"><svg id="aico_${m.id}" width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><div class="awave"><canvas id="awv_${m.id}" height="28"></canvas></div><span class="adur" id="adur_${m.id}">${m.duration||'0:00'}</span></div>`;
     else content=esc(m.text||'');
     html+=`<div class="mr${out?' me':''}" data-id="${m.id}" data-text="${esc(m.text||m.fileName||'')}" data-name="${esc(m.name||'')}">
       ${avHtml}<div class="bub ${out?'out':'in'}">${rqHtml}${content}<div class="bm2">${m.edited?'<span class="bt">ред.</span>':''}<span class="bt">${time}</span>${checks}</div></div>
@@ -717,6 +730,8 @@ function rMsgs(msgs){
   wrap.innerHTML=html;
   wrap.scrollTop=wrap.scrollHeight;
   attachMsgEv();
+  drawAllWaves();
+  notifyNewMsg(msgs);
 }
 
 function attachMsgEv(){
@@ -866,6 +881,8 @@ $('amPH').onclick=()=>{$('fi1').click();CP();};
 $('amCA').onclick=()=>{$('fi2').click();CP();};
 $('amVD').onclick=()=>{$('fi3').click();CP();};
 $('amFL').onclick=()=>{$('fi4').click();CP();};
+$('amAU').onclick=()=>{$('fi5').click();CP();};
+$('fi5').addEventListener('change',e=>{if(e.target.files[0])upFile(e.target.files[0],'audio','fi5');});
 ['fi1','fi2'].forEach(id=>$(id).addEventListener('change',e=>{if(e.target.files[0])upFile(e.target.files[0],'image',id);}));
 $('fi3').addEventListener('change',e=>{if(e.target.files[0])upFile(e.target.files[0],'video','fi3');});
 $('fi4').addEventListener('change',e=>{if(e.target.files[0])upFile(e.target.files[0],'file','fi4');});
@@ -893,6 +910,168 @@ async function upFile(file,type,inp){
     toast('Отправлено ✓');
   }catch(er){console.error(er);toast('Ошибка: '+er.message);}
   $(inp).value='';
+}
+
+
+// ── AUDIO PLAYER ──
+const AU_CTX = {};  // {id: {audio, playing, animFrame}}
+
+function toggleAudio(id, url, btn){
+  // stop all others
+  Object.keys(AU_CTX).forEach(k=>{
+    if(k!==id && AU_CTX[k]?.audio){
+      AU_CTX[k].audio.pause();
+      AU_CTX[k].playing=false;
+      const ico=document.getElementById('aico_'+k);
+      if(ico)ico.innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+    }
+  });
+  if(!AU_CTX[id]){
+    const audio=new Audio(url);
+    AU_CTX[id]={audio,playing:false};
+    audio.addEventListener('timeupdate',()=>updateAudioUI(id,audio));
+    audio.addEventListener('ended',()=>{
+      AU_CTX[id].playing=false;
+      const ico=document.getElementById('aico_'+id);
+      if(ico)ico.innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+      const dur=document.getElementById('adur_'+id);
+      if(dur)dur.textContent=fmtAudio(audio.duration||0);
+      drawWave(id,0);
+    });
+    audio.addEventListener('loadedmetadata',()=>{
+      const dur=document.getElementById('adur_'+id);
+      if(dur)dur.textContent=fmtAudio(audio.duration);
+      drawWave(id,0);
+    });
+  }
+  const ctx=AU_CTX[id];
+  if(ctx.playing){
+    ctx.audio.pause();ctx.playing=false;
+    btn.querySelector('svg').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+  }else{
+    ctx.audio.play();ctx.playing=true;
+    btn.querySelector('svg').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+  }
+}
+
+function updateAudioUI(id,audio){
+  const dur=document.getElementById('adur_'+id);
+  const remaining=(audio.duration||0)-(audio.currentTime||0);
+  if(dur)dur.textContent=fmtAudio(remaining);
+  const prog=audio.duration?audio.currentTime/audio.duration:0;
+  drawWave(id,prog);
+}
+
+function drawWave(id,progress){
+  const canvas=document.getElementById('awv_'+id);
+  if(!canvas)return;
+  const W=canvas.offsetWidth||200,H=28;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const bars=Math.floor(W/4);
+  const seed=id.split('').reduce((a,s)=>a+s.charCodeAt(0),0);
+  for(let i=0;i<bars;i++){
+    const h=Math.max(4,(Math.sin(i*0.4+seed)*0.5+0.5)*H*.8+4);
+    const filled=(i/bars)<=progress;
+    ctx.fillStyle=filled?'rgba(255,255,255,.95)':'rgba(255,255,255,.3)';
+    const x=i*4, y=H/2-h/2, r=1.5;
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.lineTo(x+3-r,y);
+    ctx.quadraticCurveTo(x+3,y,x+3,y+r);
+    ctx.lineTo(x+3,y+h-r);
+    ctx.quadraticCurveTo(x+3,y+h,x+3-r,y+h);
+    ctx.lineTo(x+r,y+h);
+    ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+    ctx.lineTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+function fmtAudio(s){
+  s=Math.round(s||0);const m=Math.floor(s/60),sec=s%60;
+  return m+':'+(sec<10?'0':'')+sec;
+}
+
+// Draw waveforms after render
+function drawAllWaves(){
+  document.querySelectorAll('.maudio').forEach(el=>{
+    const id=el.dataset.id?.replace('au_','');
+    if(id)setTimeout(()=>drawWave(id,0),50);
+  });
+}
+
+// ── PUSH NOTIFICATIONS ──
+let SW_REG = null;
+
+async function initPush(){
+  if(!('Notification' in window)||!('serviceWorker' in navigator))return;
+  // Register SW
+  try{
+    SW_REG = await navigator.serviceWorker.register('/sw.js');
+  }catch(e){
+    // sw.js not available on vercel without extra config — use inline SW
+    const swCode=`
+self.addEventListener('push',e=>{
+  const d=e.data?e.data.json():{};
+  self.registration.showNotification(d.title||'Новое сообщение',{
+    body:d.body||'',icon:d.icon||'/icon.png',badge:'/icon.png',
+    data:{url:d.url||'/'},vibrate:[200,100,200]
+  });
+});
+self.addEventListener('notificationclick',e=>{
+  e.notification.close();
+  e.waitUntil(clients.openWindow(e.notification.data.url||'/'));
+});`;
+    const blob=new Blob([swCode],{type:'application/javascript'});
+    const url=URL.createObjectURL(blob);
+    try{SW_REG=await navigator.serviceWorker.register(url);}catch(e2){console.log('SW failed',e2);return;}
+  }
+  // Request permission
+  if(Notification.permission==='default'){
+    const p=await Notification.requestPermission();
+    if(p!=='granted')return;
+  }
+  if(Notification.permission!=='granted')return;
+  // Save push token (subscription) to Firestore
+  savePushSub();
+}
+
+async function savePushSub(){
+  if(!SW_REG||!ME)return;
+  // Store device token in user doc for later use
+  try{
+    await db.collection('users').doc(ME.uid).update({
+      pushEnabled:true,
+      lastActive:firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }catch(e){}
+}
+
+// Show local notification when app is in background
+function tryNotify(title,body){
+  if(document.visibilityState==='visible')return; // app is open
+  if(Notification.permission!=='granted')return;
+  try{
+    new Notification(title,{body,icon:'https://api.dicebear.com/7.x/shapes/svg?seed=msg',silent:false,vibrate:[200,100,200]});
+  }catch(e){}
+}
+
+// Hook into message listener to show notifications
+
+// ── NOTIFY on new messages ──
+function notifyNewMsg(msgs){
+  if(!msgs.length)return;
+  const last=msgs[msgs.length-1];
+  if(last.uid===ME.uid)return; // own message
+  const age=last.ts?.toDate?Date.now()-last.ts.toDate().getTime():9999999;
+  if(age>8000)return; // older than 8s — don't notify
+  const name=last.name||'Новое сообщение';
+  const body=last.type==='image'?'📷 Фото':last.type==='audio'?'🎤 Голосовое':last.type==='file'?'📎 '+last.fileName:(last.text||'');
+  tryNotify(name,body);
 }
 
 // ── IMG VIEWER ──
