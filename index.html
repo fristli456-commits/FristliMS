@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0d0f14">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,8 +14,8 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
 :root{--bg:#0d0f14;--sf:#161923;--sf2:#1e2330;--sf3:#252b3b;--ac:#6c63ff;--ac2:#a78bfa;--tx:#e8eaf6;--dim:#7b82a0;--gr:#43e97b;--rd:#ff5f7e;}
-html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--tx)}
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .32s}
+html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--tx)}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .32s;height:100%;height:100dvh}
 .screen.off{transform:translateY(40px);opacity:0;pointer-events:none}
 
 /* ── AUTH ── */
@@ -90,7 +90,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 .blo:active{background:rgba(255,95,126,.2)}
 
 /* ── CHAT ── */
-#sc{background:var(--bg);position:relative}
+#sc{background:var(--bg);position:relative;height:100%;height:100dvh}
 
 /* Sel bar */
 #selbar{position:absolute;top:0;left:0;right:0;z-index:20;padding:46px 13px 11px;background:var(--sf);display:none;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.06)}
@@ -126,7 +126,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 .msrc{color:var(--dim)}
 
 /* Messages */
-.msgs{flex:1;overflow-y:auto;padding:7px 10px 4px;display:flex;flex-direction:column;gap:3px;scrollbar-width:none;overscroll-behavior:contain}
+.msgs{flex:1;overflow-y:auto;padding:7px 10px 4px;display:flex;flex-direction:column;gap:3px;scrollbar-width:none;overscroll-behavior:contain;min-height:0}
 .msgs::-webkit-scrollbar{display:none}
 .dd{display:flex;align-items:center;gap:8px;margin:5px 0}
 .dl{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--sf2),transparent)}
@@ -175,7 +175,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 .rpx{background:none;border:none;cursor:pointer;color:var(--dim);font-size:22px;line-height:1;padding:0 3px}
 
 /* Input — RESPONSIVE */
-.ib2{padding:8px 10px env(safe-area-inset-bottom, 10px);display:flex;align-items:flex-end;gap:7px;flex-shrink:0}
+.ib2{padding:8px 10px calc(env(safe-area-inset-bottom, 0px) + 10px);display:flex;align-items:flex-end;gap:7px;flex-shrink:0;background:var(--bg)}
 .ab{width:39px;height:39px;border-radius:50%;background:var(--sf);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:2px}
 .ab:active{background:var(--sf2)}
 .iw{flex:1;background:var(--sf);border-radius:20px;display:flex;align-items:flex-end;padding:0 11px;border:1.5px solid rgba(108,99,255,.15);transition:border-color .2s;gap:6px}
